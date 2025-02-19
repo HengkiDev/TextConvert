@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Math & Text Converter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: clamp(1.5em, 4vw, 2.5em);
+      word-wrap: break-word;
+    }
+    
+    .input-section {
+      margin-bottom: 20px;
+    }
+    
+    .input-section h2 {
+      color: #34495e;
+      font-size: clamp(1em, 3vw, 1.2em);
+      margin-bottom: 10px;
+      word-wrap: break-word;
+    }
+    
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 15px;
+      font-size: clamp(14px, 2vw, 16px);
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+      font-family: 'Consolas', monospace;
+      box-sizing: border-box;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background: linear-gradient(to right, #3498db, #2980b9);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: clamp(14px, 2vw, 16px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .output-section {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      min-height: 100px;
+      overflow-x: auto;
+    }
+    
+    .output-content {
+      font-size: clamp(14px, 2vw, 16px);
+      line-height: 1.6;
+      color: #2c3e50;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .output-content :is(p, div) {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .examples {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e8f4fc;
+      border-radius: 8px;
+    }
+
+    .examples h3 {
+      color: #2980b9;
+      margin-bottom: 10px;
+      font-size: clamp(1em, 2.5vw, 1.1em);
+    }
+
+    .example-item {
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      font-size: clamp(13px, 2vw, 15px);
+      margin-bottom: 5px;
+    }
+
+    .example-item:hover {
+      background-color: #d1e8f7;
+    }
+
+    /* Handle MathJax overflow */
+    .MathJax_Display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+    }
+
+    @media screen and (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .button-group {
+        justify-content: center;
+      }
+      
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Math & Text Converter</h1>
+    
+    <div class="input-section">
+      <h2>Masukkan Teks LaTex:</h2>
+      <textarea id="input" placeholder="Contoh: Rumus trigonometri dasar: $\frac{\text{Opposite}}{\text{Adjacent}} = \frac{AB}{AC} = \frac{7}{24}$ menunjukkan hubungan antara sisi-sisi segitiga."></textarea>
+    </div>
+    
+    <div class="button-group">
+      <button onclick="convertMath()">Convert</button>
+      <button onclick="clearAll()">Clear</button>
+    </div>
+  <h4>Hasil:</h4>
+    <div class="output-section">
+      <div id="output" class="output-content"></div>
+    </div>
+
+    <div class="examples">
+      <h3>Contoh Formula:</h3>
+      <div class="example-item" onclick="insertExample(1)">
+        Formula pendek: $E = mc^2$
+      </div>
+      <div class="example-item" onclick="insertExample(2)">
+        Formula sedang: $\frac{-b \pm \sqrt{b^2-4ac}}{2a}$
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function convertMath() {
+      const input = document.getElementById('input').value;
+      const output = document.getElementById('output');
+      
+      let formattedText = input.replace(/\$(.*?)\$/g, function(match, formula) {
+        return '$$' + formula + '$$';
+      });
+      
+      output.innerHTML = formattedText;
+      MathJax.Hub.Queue(["Typeset", MathJax.Hub, output]);
+    }
+    
+    function clearAll() {
+      document.getElementById('input').value = '';
+      document.getElementById('output').innerHTML = '';
+    }
+    
+    function insertExample(num) {
+      const input = document.getElementById('input');
+      if (num === 1) {
+        input.value = 'Rumus Einstein yang terkenal: $E = mc^2$ menunjukkan hubungan antara massa dan energi.';
+      } else if (num === 2) {
+        input.value = 'Rumus kuadrat: $\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$ digunakan untuk mencari akar persamaan kuadrat.';
+      }
+      convertMath();
+    }
+  
+  </script>
+</body>
+</html>
